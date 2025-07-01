@@ -266,4 +266,17 @@ class AthleteService {
       return false;
     }
   }
+
+  Future<bool> deleteAthlete(int athleteId) async {
+    try {
+      final response = await _httpService.delete('${ApiConfig.athletes}$athleteId/');
+      print('Delete athlete response: ${response.statusCode}');
+      print('Delete athlete body: ${response.body}');
+
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      print('Delete athlete error: $e');
+      return false;
+    }
+  }
 }

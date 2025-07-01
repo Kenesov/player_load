@@ -267,29 +267,7 @@ class _AddAthleteScreenState extends State<AddAthleteScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _sportController,
-                  decoration: InputDecoration(
-                    labelText: 'Sport turi',
-                    prefixIcon: Icon(Icons.sports),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _teamController,
-                  decoration: InputDecoration(
-                    labelText: 'Jamoa (ixtiyoriy)',
-                    prefixIcon: Icon(Icons.group),
-                    helperText: 'Jamoa nomi (majburiy emas)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,

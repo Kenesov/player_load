@@ -262,20 +262,46 @@ class _CoachDashboardState extends State<CoachDashboard> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'MASHG\'ULOT',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'MASHG\'ULOT',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 8),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'delete') {
+                          _showDeleteTrainingDialog(session);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('O\'chirish'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: Icon(Icons.more_vert),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -294,20 +320,101 @@ class _CoachDashboardState extends State<CoachDashboard> {
                 style: TextStyle(color: Colors.grey[600]),
               ),
             SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text('${session.durationMinutes} daqiqa'),
-                    SizedBox(width: 16),
-                    Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text('${session.date.day}/${session.date.month}/${session.date.year}'),
-                  ],
-                ),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text('${session.durationMinutes} daqiqa'),
+                SizedBox(width: 16),
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text('${session.date.day}/${session.date.month}/${session.date.year}'),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _showDeleteTrainingDialog(TrainingSession session) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Mashg\'ulotni o\'chirish'),
+          content: Text(
+            'Haqiqatan ham "${session.title}" mashg\'ulotini o\'chirmoqchimisiz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Bekor qilish'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _deleteTrainingSession(session);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('O\'chirish'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteTrainingSession(TrainingSession session) async {
+    // Loading dialog ko'rsatish
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('O\'chirilmoqda...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      bool success = await TrainingService().deleteTrainingSession(session.id);
+
+      Navigator.pop(context); // Loading dialog ni yopish
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${session.title} mashg\'uloti muvaffaqiyatli o\'chirildi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadData(); // Ma'lumotlarni yangilash
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Mashg\'ulotni o\'chirishda xatolik yuz berdi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Loading dialog ni yopish
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Xatolik: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

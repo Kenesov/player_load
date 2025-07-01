@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/athlete_model.dart';
 import '../services/auth_service.dart';
+import '../services/athlete_service.dart';
 import '../widgets/profile_avatar.dart';
 import 'add_athlete_screen.dart';
 import 'athlete_detail_screen.dart';
@@ -191,7 +192,16 @@ class _CoachAthletesState extends State<CoachAthletes> {
               ),
           ],
         ),
-        trailing: Icon(Icons.arrow_forward_ios),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _showDeleteAthleteDialog(athlete),
+            ),
+            Icon(Icons.arrow_forward_ios),
+          ],
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -202,5 +212,86 @@ class _CoachAthletesState extends State<CoachAthletes> {
         },
       ),
     );
+  }
+
+  void _showDeleteAthleteDialog(Athlete athlete) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sportchini o\'chirish'),
+          content: Text(
+            'Haqiqattan ham ${athlete.user.firstName} ${athlete.user.lastName} sportchini o\'chirmoqchimisiz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Bekor qilish'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _deleteAthlete(athlete);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('O\'chirish'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAthlete(Athlete athlete) async {
+    // Loading dialog ko'rsatish
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('O\'chirilmoqda...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      bool success = await AthleteService().deleteAthlete(athlete.id);
+
+      Navigator.pop(context); // Loading dialog ni yopish
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${athlete.user.firstName} ${athlete.user.lastName} muvaffaqiyatli o\'chirildi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadAthletes(); // Ro'yxatni yangilash
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sportchini o\'chirishda xatolik yuz berdi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Loading dialog ni yopish
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Xatolik: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

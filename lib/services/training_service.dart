@@ -128,6 +128,19 @@ class TrainingService {
     }
   }
 
+  Future<bool> deleteTrainingSession(int sessionId) async {
+    try {
+      final response = await _httpService.delete('${ApiConfig.trainingSessions}$sessionId/');
+      print('Delete training session response: ${response.statusCode}');
+      print('Delete training session body: ${response.body}');
+
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      print('Delete training session error: $e');
+      return false;
+    }
+  }
+
   Future<List<RPERecord>> getRPERecords() async {
     try {
       final response = await _httpService.get(ApiConfig.rpeRecords);

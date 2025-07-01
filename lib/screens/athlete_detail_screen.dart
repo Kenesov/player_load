@@ -51,7 +51,6 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
         title: Text('${widget.athlete.user.firstName} ${widget.athlete.user.lastName}'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -94,6 +93,7 @@ class _AthleteDetailScreenState extends State<AthleteDetailScreen> {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),
